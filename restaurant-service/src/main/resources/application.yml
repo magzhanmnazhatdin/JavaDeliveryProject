@@ -1,0 +1,78 @@
+server:
+  port: 8082
+
+spring:
+  application:
+    name: restaurant-service
+
+  datasource:
+    url: jdbc:postgresql://localhost:5434/restaurant_db
+    username: restaurant_user
+    password: restaurant_password
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: restaurant-service-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: com.example.*
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8180/realms/delivery-realm
+          jwk-set-uri: http://localhost:8180/realms/delivery-realm/protocol/openid-connect/certs
+
+# Kafka topics
+app:
+  kafka:
+    topics:
+      order-events: order-events
+      restaurant-events: restaurant-events
+
+# Logging
+logging:
+  level:
+    com.example.restaurantservice: DEBUG
+    org.springframework.kafka: INFO
+    org.springframework.security: DEBUG
+
+# Swagger / OpenAPI
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    enabled: true
+
+# Actuator
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always

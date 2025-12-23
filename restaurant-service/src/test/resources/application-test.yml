@@ -1,0 +1,46 @@
+server:
+  port: 0
+
+spring:
+  application:
+    name: restaurant-service-test
+
+  datasource:
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+
+  flyway:
+    enabled: false
+
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: test-group
+      auto-offset-reset: earliest
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8180/realms/test-realm
+
+app:
+  kafka:
+    topics:
+      order-events: test-order-events
+      restaurant-events: test-restaurant-events
+
+logging:
+  level:
+    root: WARN
+    com.example.restaurantservice: DEBUG
