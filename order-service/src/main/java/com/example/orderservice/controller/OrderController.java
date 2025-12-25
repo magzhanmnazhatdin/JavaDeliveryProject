@@ -129,6 +129,29 @@ public class OrderController {
         return ResponseEntity.ok(orderService.cancelOrder(orderId, customerId, request));
     }
 
+    @PutMapping("/{orderId}")
+    @PreAuthorize("hasAnyRole('CUSTOMER', 'ADMIN')")
+    @Operation(summary = "Update order details (only for pending orders)")
+    public ResponseEntity<OrderDto> updateOrder(
+            @PathVariable UUID orderId,
+            @AuthenticationPrincipal Jwt jwt,
+            @Valid @RequestBody UpdateOrderRequest request
+    ) {
+        if (hasRole(jwt, "ADMIN")) {
+            return ResponseEntity.ok(orderService.updateOrderByAdmin(orderId, request));
+        }
+        UUID customerId = UUID.fromString(jwt.getSubject());
+        return ResponseEntity.ok(orderService.updateOrder(orderId, customerId, request));
+    }
+
+    @DeleteMapping("/{orderId}")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Delete an order (Admin only, only pending/cancelled/rejected orders)")
+    public ResponseEntity<Void> deleteOrder(@PathVariable UUID orderId) {
+        orderService.deleteOrder(orderId);
+        return ResponseEntity.noContent().build();
+    }
+
     private boolean hasRole(Jwt jwt, String role) {
         var realmAccess = jwt.getClaimAsMap("realm_access");
         if (realmAccess == null) {

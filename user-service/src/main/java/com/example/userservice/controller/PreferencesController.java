@@ -60,4 +60,20 @@ public class PreferencesController {
         UserPreferencesDto preferences = preferencesService.updatePreferences(userId, request);
         return ResponseEntity.ok(preferences);
     }
+
+    @DeleteMapping
+    @Operation(summary = "Reset current user's preferences to defaults")
+    public ResponseEntity<Void> resetMyPreferences(@AuthenticationPrincipal Jwt jwt) {
+        String keycloakId = jwt.getSubject();
+        preferencesService.resetPreferencesForCurrentUser(keycloakId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/user/{userId}")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Reset user's preferences to defaults (Admin only)")
+    public ResponseEntity<Void> resetUserPreferences(@PathVariable UUID userId) {
+        preferencesService.resetPreferences(userId);
+        return ResponseEntity.noContent().build();
+    }
 }

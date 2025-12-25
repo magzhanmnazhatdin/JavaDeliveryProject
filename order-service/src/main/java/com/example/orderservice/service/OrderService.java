@@ -30,6 +30,12 @@ public interface OrderService {
 
     OrderDto cancelOrderByAdmin(UUID orderId, CancelOrderRequest request);
 
+    OrderDto updateOrder(UUID orderId, UUID customerId, UpdateOrderRequest request);
+
+    OrderDto updateOrderByAdmin(UUID orderId, UpdateOrderRequest request);
+
+    void deleteOrder(UUID orderId);
+
     void handleOrderAccepted(UUID orderId, Integer estimatedPrepTimeMinutes);
 
     void handleOrderRejected(UUID orderId, String reason);

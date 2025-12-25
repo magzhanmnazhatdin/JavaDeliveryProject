@@ -112,4 +112,38 @@ public class AddressController {
         List<AddressDto> addresses = addressService.getUserAddresses(userId);
         return ResponseEntity.ok(addresses);
     }
+
+    @PutMapping("/user/{userId}/{addressId}")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Update user's address (Admin only)")
+    public ResponseEntity<AddressDto> updateUserAddress(
+            @PathVariable UUID userId,
+            @PathVariable UUID addressId,
+            @Valid @RequestBody UpdateAddressRequest request
+    ) {
+        AddressDto address = addressService.updateAddress(userId, addressId, request);
+        return ResponseEntity.ok(address);
+    }
+
+    @DeleteMapping("/user/{userId}/{addressId}")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Delete user's address (Admin only)")
+    public ResponseEntity<Void> deleteUserAddress(
+            @PathVariable UUID userId,
+            @PathVariable UUID addressId
+    ) {
+        addressService.deleteAddress(userId, addressId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/user/{userId}/{addressId}/set-default")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Set user's default address (Admin only)")
+    public ResponseEntity<Void> setUserDefaultAddress(
+            @PathVariable UUID userId,
+            @PathVariable UUID addressId
+    ) {
+        addressService.setDefaultAddress(userId, addressId);
+        return ResponseEntity.ok().build();
+    }
 }

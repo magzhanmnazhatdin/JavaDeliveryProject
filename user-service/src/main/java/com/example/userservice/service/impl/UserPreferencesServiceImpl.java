@@ -100,6 +100,28 @@ public class UserPreferencesServiceImpl implements UserPreferencesService {
         log.info("Default preferences created for user {}", userId);
     }
 
+    @Override
+    public void resetPreferences(UUID userId) {
+        UserPreferences preferences = preferencesRepository.findByUserId(userId)
+                .orElseThrow(() -> new PreferencesNotFoundException("Preferences not found for user: " + userId));
+
+        preferences.setPushNotificationsEnabled(true);
+        preferences.setEmailNotificationsEnabled(true);
+        preferences.setSmsNotificationsEnabled(false);
+        preferences.setOrderUpdatesEnabled(true);
+        preferences.setPromotionalEmailsEnabled(false);
+        preferences.setDefaultPaymentMethod(null);
+
+        preferencesRepository.save(preferences);
+        log.info("Preferences reset to defaults for user {}", userId);
+    }
+
+    @Override
+    public void resetPreferencesForCurrentUser(String keycloakId) {
+        User user = findUserByKeycloakId(keycloakId);
+        resetPreferences(user.getId());
+    }
+
     private User findUserByKeycloakId(String keycloakId) {
         return userRepository.findByKeycloakId(keycloakId)
                 .orElseThrow(() -> new UserNotFoundException("User not found with keycloak ID: " + keycloakId));

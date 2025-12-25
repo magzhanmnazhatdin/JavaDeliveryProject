@@ -158,4 +158,19 @@ public class RestaurantOrderController {
         RestaurantOrderDto order = orderService.markAsPickedUp(id);
         return ResponseEntity.ok(order);
     }
+
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Delete order", description = "Deletes a pending, rejected, or cancelled order (Admin only)")
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "Order deleted successfully"),
+            @ApiResponse(responseCode = "400", description = "Cannot delete order in current status"),
+            @ApiResponse(responseCode = "404", description = "Order not found")
+    })
+    public ResponseEntity<Void> deleteOrder(
+            @Parameter(description = "Order ID") @PathVariable UUID id) {
+        log.info("REST request to delete restaurant order: {}", id);
+        orderService.deleteOrder(id);
+        return ResponseEntity.noContent().build();
+    }
 }

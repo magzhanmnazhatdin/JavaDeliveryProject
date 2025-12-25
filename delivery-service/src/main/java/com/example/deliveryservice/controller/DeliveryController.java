@@ -155,4 +155,35 @@ public class DeliveryController {
         DeliveryDto delivery = deliveryService.updateDeliveryStatus(id, request);
         return ResponseEntity.ok(delivery);
     }
+
+    @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'RESTAURANT')")
+    @Operation(summary = "Update delivery details", description = "Updates delivery address and notes")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Delivery updated successfully"),
+            @ApiResponse(responseCode = "400", description = "Cannot update delivery in current status"),
+            @ApiResponse(responseCode = "404", description = "Delivery not found")
+    })
+    public ResponseEntity<DeliveryDto> updateDelivery(
+            @Parameter(description = "Delivery ID") @PathVariable UUID id,
+            @Valid @RequestBody UpdateDeliveryRequest request) {
+        log.info("REST request to update delivery {}", id);
+        DeliveryDto delivery = deliveryService.updateDelivery(id, request);
+        return ResponseEntity.ok(delivery);
+    }
+
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Delete delivery", description = "Deletes a pending or cancelled delivery (Admin only)")
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "Delivery deleted successfully"),
+            @ApiResponse(responseCode = "400", description = "Cannot delete delivery in current status"),
+            @ApiResponse(responseCode = "404", description = "Delivery not found")
+    })
+    public ResponseEntity<Void> deleteDelivery(
+            @Parameter(description = "Delivery ID") @PathVariable UUID id) {
+        log.info("REST request to delete delivery {}", id);
+        deliveryService.deleteDelivery(id);
+        return ResponseEntity.noContent().build();
+    }
 }

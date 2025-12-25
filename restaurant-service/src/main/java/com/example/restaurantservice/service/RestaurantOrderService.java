@@ -34,4 +34,6 @@ public interface RestaurantOrderService {
     RestaurantOrderDto markAsReady(UUID id);
 
     RestaurantOrderDto markAsPickedUp(UUID id);
+
+    void deleteOrder(UUID id);
 }

@@ -3,6 +3,7 @@ package com.example.orderservice.service.impl;
 import com.example.orderservice.dto.payment.PaymentDto;
 import com.example.orderservice.dto.payment.ProcessPaymentRequest;
 import com.example.orderservice.dto.payment.RefundRequest;
+import com.example.orderservice.dto.payment.UpdatePaymentRequest;
 import com.example.orderservice.entity.Order;
 import com.example.orderservice.entity.OrderStatus;
 import com.example.orderservice.entity.Payment;
@@ -103,6 +104,27 @@ public class PaymentServiceImpl implements PaymentService {
     public Page<PaymentDto> getPaymentsByCustomer(UUID customerId, Pageable pageable) {
         return paymentRepository.findByCustomerId(customerId, pageable)
                 .map(paymentMapper::toDto);
+    }
+
+    @Override
+    public PaymentDto updatePayment(UUID paymentId, UpdatePaymentRequest request) {
+        log.info("Updating payment: {}", paymentId);
+
+        Payment payment = paymentRepository.findById(paymentId)
+                .orElseThrow(() -> new PaymentNotFoundException("Payment not found: " + paymentId));
+
+        if (payment.getStatus() != PaymentStatus.PENDING) {
+            throw new InvalidPaymentStateException(
+                    "Only pending payments can be updated. Current status: " + payment.getStatus()
+            );
+        }
+
+        payment.setPaymentMethod(request.getPaymentMethod());
+
+        Payment savedPayment = paymentRepository.save(payment);
+        log.info("Payment {} updated successfully", paymentId);
+
+        return paymentMapper.toDto(savedPayment);
     }
 
     @Override

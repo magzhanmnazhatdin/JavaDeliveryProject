@@ -16,4 +16,8 @@ public interface UserPreferencesService {
     UserPreferencesDto updatePreferencesForCurrentUser(String keycloakId, UpdatePreferencesRequest request);
 
     void createDefaultPreferences(UUID userId);
+
+    void resetPreferences(UUID userId);
+
+    void resetPreferencesForCurrentUser(String keycloakId);
 }

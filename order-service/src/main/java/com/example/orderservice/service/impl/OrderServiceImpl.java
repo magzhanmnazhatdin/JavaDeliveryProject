@@ -178,6 +178,74 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    public OrderDto updateOrder(UUID orderId, UUID customerId, UpdateOrderRequest request) {
+        Order order = findOrderById(orderId);
+
+        if (!order.getCustomerId().equals(customerId)) {
+            throw new UnauthorizedAccessException("You don't have access to this order");
+        }
+
+        if (!CANCELLABLE_STATUSES.contains(order.getStatus())) {
+            throw new InvalidOrderStateException(
+                    "Order cannot be updated in status: " + order.getStatus()
+            );
+        }
+
+        return performUpdate(order, request);
+    }
+
+    @Override
+    public OrderDto updateOrderByAdmin(UUID orderId, UpdateOrderRequest request) {
+        Order order = findOrderById(orderId);
+
+        if (order.getStatus() == OrderStatus.DELIVERED ||
+            order.getStatus() == OrderStatus.CANCELLED ||
+            order.getStatus() == OrderStatus.REJECTED) {
+            throw new InvalidOrderStateException(
+                    "Order cannot be updated in status: " + order.getStatus()
+            );
+        }
+
+        return performUpdate(order, request);
+    }
+
+    @Override
+    public void deleteOrder(UUID orderId) {
+        Order order = findOrderById(orderId);
+
+        if (order.getStatus() != OrderStatus.PENDING &&
+            order.getStatus() != OrderStatus.CANCELLED &&
+            order.getStatus() != OrderStatus.REJECTED) {
+            throw new InvalidOrderStateException(
+                    "Only pending, cancelled, or rejected orders can be deleted. Current status: " + order.getStatus()
+            );
+        }
+
+        orderRepository.delete(order);
+        log.info("Order {} deleted", orderId);
+    }
+
+    private OrderDto performUpdate(Order order, UpdateOrderRequest request) {
+        if (request.getDeliveryAddress() != null) {
+            order.setDeliveryAddress(request.getDeliveryAddress());
+        }
+        if (request.getDeliveryLat() != null) {
+            order.setDeliveryLat(request.getDeliveryLat());
+        }
+        if (request.getDeliveryLng() != null) {
+            order.setDeliveryLng(request.getDeliveryLng());
+        }
+        if (request.getCustomerNotes() != null) {
+            order.setCustomerNotes(request.getCustomerNotes());
+        }
+
+        Order savedOrder = orderRepository.save(order);
+        log.info("Order {} updated", order.getId());
+
+        return orderMapper.toDto(savedOrder);
+    }
+
+    @Override
     public void handleOrderAccepted(UUID orderId, Integer estimatedPrepTimeMinutes) {
         Order order = findOrderById(orderId);
         order.setStatus(OrderStatus.ACCEPTED_BY_RESTAURANT);

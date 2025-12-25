@@ -31,5 +31,9 @@ public interface DeliveryService {
 
     DeliveryDto updateDeliveryStatus(UUID deliveryId, UpdateDeliveryStatusRequest request);
 
+    DeliveryDto updateDelivery(UUID deliveryId, UpdateDeliveryRequest request);
+
+    void deleteDelivery(UUID deliveryId);
+
     void handleOrderReady(UUID orderId);
 }

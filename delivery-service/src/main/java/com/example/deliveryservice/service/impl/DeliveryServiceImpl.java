@@ -228,6 +228,60 @@ public class DeliveryServiceImpl implements DeliveryService {
     }
 
     @Override
+    public DeliveryDto updateDelivery(UUID deliveryId, UpdateDeliveryRequest request) {
+        log.info("Updating delivery: {}", deliveryId);
+
+        Delivery delivery = findDeliveryById(deliveryId);
+
+        if (delivery.getStatus() == DeliveryStatus.DELIVERED ||
+            delivery.getStatus() == DeliveryStatus.CANCELLED) {
+            throw new BadRequestException(
+                    "Cannot update delivery in status: " + delivery.getStatus()
+            );
+        }
+
+        if (request.getDeliveryAddress() != null) {
+            delivery.setDeliveryAddress(request.getDeliveryAddress());
+        }
+        if (request.getDeliveryLat() != null) {
+            delivery.setDeliveryLat(request.getDeliveryLat());
+        }
+        if (request.getDeliveryLng() != null) {
+            delivery.setDeliveryLng(request.getDeliveryLng());
+        }
+        if (request.getCustomerNotes() != null) {
+            delivery.setCustomerNotes(request.getCustomerNotes());
+        }
+
+        Delivery updatedDelivery = deliveryRepository.save(delivery);
+        log.info("Delivery {} updated successfully", deliveryId);
+
+        return deliveryMapper.toDto(updatedDelivery);
+    }
+
+    @Override
+    public void deleteDelivery(UUID deliveryId) {
+        log.info("Deleting delivery: {}", deliveryId);
+
+        Delivery delivery = findDeliveryById(deliveryId);
+
+        if (delivery.getStatus() != DeliveryStatus.PENDING &&
+            delivery.getStatus() != DeliveryStatus.CANCELLED) {
+            throw new BadRequestException(
+                    "Only pending or cancelled deliveries can be deleted. Current status: " + delivery.getStatus()
+            );
+        }
+
+        if (delivery.getCourier() != null) {
+            delivery.getCourier().setStatus(CourierStatus.AVAILABLE);
+            courierRepository.save(delivery.getCourier());
+        }
+
+        deliveryRepository.delete(delivery);
+        log.info("Delivery {} deleted", deliveryId);
+    }
+
+    @Override
     public void handleOrderReady(UUID orderId) {
         log.info("Handling order ready for order: {}", orderId);
 

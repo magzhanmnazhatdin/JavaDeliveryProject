@@ -244,6 +244,23 @@ public class RestaurantOrderServiceImpl implements RestaurantOrderService {
         return orderMapper.toDto(savedOrder);
     }
 
+    @Override
+    public void deleteOrder(UUID id) {
+        log.info("Deleting restaurant order: {}", id);
+        RestaurantOrder order = findOrderById(id);
+
+        if (order.getStatus() != RestaurantOrderStatus.PENDING &&
+            order.getStatus() != RestaurantOrderStatus.REJECTED &&
+            order.getStatus() != RestaurantOrderStatus.CANCELLED) {
+            throw new BadRequestException(
+                    "Only pending, rejected, or cancelled orders can be deleted. Current status: " + order.getStatus()
+            );
+        }
+
+        orderRepository.delete(order);
+        log.info("Restaurant order {} deleted", id);
+    }
+
     private RestaurantOrder findOrderById(UUID id) {
         return orderRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("RestaurantOrder", "id", id));

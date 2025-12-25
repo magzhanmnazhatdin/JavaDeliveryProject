@@ -3,6 +3,7 @@ package com.example.orderservice.controller;
 import com.example.orderservice.dto.payment.PaymentDto;
 import com.example.orderservice.dto.payment.ProcessPaymentRequest;
 import com.example.orderservice.dto.payment.RefundRequest;
+import com.example.orderservice.dto.payment.UpdatePaymentRequest;
 import com.example.orderservice.service.PaymentService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -59,6 +60,16 @@ public class PaymentController {
     ) {
         UUID customerId = UUID.fromString(jwt.getSubject());
         return ResponseEntity.ok(paymentService.getPaymentsByCustomer(customerId, pageable));
+    }
+
+    @PutMapping("/{paymentId}")
+    @PreAuthorize("hasAnyRole('CUSTOMER', 'ADMIN')")
+    @Operation(summary = "Update payment method (only for pending payments)")
+    public ResponseEntity<PaymentDto> updatePayment(
+            @PathVariable UUID paymentId,
+            @Valid @RequestBody UpdatePaymentRequest request
+    ) {
+        return ResponseEntity.ok(paymentService.updatePayment(paymentId, request));
     }
 
     @PostMapping("/{paymentId}/refund")
