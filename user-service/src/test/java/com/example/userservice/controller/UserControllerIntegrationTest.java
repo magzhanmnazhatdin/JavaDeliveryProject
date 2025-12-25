@@ -1,5 +1,6 @@
 package com.example.userservice.controller;
 
+import com.example.userservice.config.SecurityConfig;
 import com.example.userservice.dto.user.*;
 import com.example.userservice.entity.UserRole;
 import com.example.userservice.entity.UserStatus;
@@ -10,9 +11,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
@@ -27,6 +30,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(UserController.class)
+@Import(SecurityConfig.class)
 class UserControllerIntegrationTest {
 
     @Autowired
@@ -54,12 +58,16 @@ class UserControllerIntegrationTest {
                 .status(UserStatus.ACTIVE)
                 .build();
 
-        when(userService.getCurrentUser(keycloakId)).thenReturn(userDto);
+        when(userService.getOrCreateUser(eq(keycloakId), any(), any(), any())).thenReturn(userDto);
 
         mockMvc.perform(get("/api/users/me")
                         .with(jwt().jwt(jwt -> jwt
                                 .subject(keycloakId)
-                                .claim("realm_access", Map.of("roles", List.of("CUSTOMER"))))))
+                                .claim("email", "john@example.com")
+                                .claim("given_name", "John")
+                                .claim("family_name", "Doe")
+                                .claim("realm_access", Map.of("roles", List.of("CUSTOMER"))))
+                                .authorities(new SimpleGrantedAuthority("ROLE_CUSTOMER"))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.email").value("john@example.com"))
                 .andExpect(jsonPath("$.firstName").value("John"))
@@ -94,7 +102,8 @@ class UserControllerIntegrationTest {
         mockMvc.perform(put("/api/users/me")
                         .with(jwt().jwt(jwt -> jwt
                                 .subject(keycloakId)
-                                .claim("realm_access", Map.of("roles", List.of("CUSTOMER")))))
+                                .claim("realm_access", Map.of("roles", List.of("CUSTOMER"))))
+                                .authorities(new SimpleGrantedAuthority("ROLE_CUSTOMER")))
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
@@ -120,7 +129,8 @@ class UserControllerIntegrationTest {
         mockMvc.perform(get("/api/users")
                         .with(jwt().jwt(jwt -> jwt
                                 .subject(UUID.randomUUID().toString())
-                                .claim("realm_access", Map.of("roles", List.of("ADMIN"))))))
+                                .claim("realm_access", Map.of("roles", List.of("ADMIN"))))
+                                .authorities(new SimpleGrantedAuthority("ROLE_ADMIN"))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content").isArray())
                 .andExpect(jsonPath("$.content[0].email").value("john@example.com"));
@@ -132,7 +142,8 @@ class UserControllerIntegrationTest {
         mockMvc.perform(get("/api/users")
                         .with(jwt().jwt(jwt -> jwt
                                 .subject(UUID.randomUUID().toString())
-                                .claim("realm_access", Map.of("roles", List.of("CUSTOMER"))))))
+                                .claim("realm_access", Map.of("roles", List.of("CUSTOMER"))))
+                                .authorities(new SimpleGrantedAuthority("ROLE_CUSTOMER"))))
                 .andExpect(status().isForbidden());
     }
 
@@ -155,7 +166,8 @@ class UserControllerIntegrationTest {
         mockMvc.perform(get("/api/users/{userId}", userId)
                         .with(jwt().jwt(jwt -> jwt
                                 .subject(UUID.randomUUID().toString())
-                                .claim("realm_access", Map.of("roles", List.of("ADMIN"))))))
+                                .claim("realm_access", Map.of("roles", List.of("ADMIN"))))
+                                .authorities(new SimpleGrantedAuthority("ROLE_ADMIN"))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(userId.toString()))
                 .andExpect(jsonPath("$.email").value("john@example.com"));
@@ -169,10 +181,11 @@ class UserControllerIntegrationTest {
         mockMvc.perform(patch("/api/users/{userId}/status", userId)
                         .with(jwt().jwt(jwt -> jwt
                                 .subject(UUID.randomUUID().toString())
-                                .claim("realm_access", Map.of("roles", List.of("ADMIN")))))
+                                .claim("realm_access", Map.of("roles", List.of("ADMIN"))))
+                                .authorities(new SimpleGrantedAuthority("ROLE_ADMIN")))
                         .with(csrf())
                         .param("status", "SUSPENDED"))
-                .andExpect(status().isNoContent());
+                .andExpect(status().isOk());
 
         verify(userService).updateUserStatus(userId, UserStatus.SUSPENDED);
     }
@@ -193,7 +206,8 @@ class UserControllerIntegrationTest {
         mockMvc.perform(get("/api/users/search")
                         .with(jwt().jwt(jwt -> jwt
                                 .subject(UUID.randomUUID().toString())
-                                .claim("realm_access", Map.of("roles", List.of("ADMIN")))))
+                                .claim("realm_access", Map.of("roles", List.of("ADMIN"))))
+                                .authorities(new SimpleGrantedAuthority("ROLE_ADMIN")))
                         .param("query", "john"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content[0].fullName").value("John Doe"));
@@ -207,7 +221,8 @@ class UserControllerIntegrationTest {
         mockMvc.perform(delete("/api/users/{userId}", userId)
                         .with(jwt().jwt(jwt -> jwt
                                 .subject(UUID.randomUUID().toString())
-                                .claim("realm_access", Map.of("roles", List.of("ADMIN")))))
+                                .claim("realm_access", Map.of("roles", List.of("ADMIN"))))
+                                .authorities(new SimpleGrantedAuthority("ROLE_ADMIN")))
                         .with(csrf()))
                 .andExpect(status().isNoContent());
 

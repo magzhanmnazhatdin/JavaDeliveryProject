@@ -56,6 +56,8 @@ class UserEventProducerIntegrationTest {
         consumerProps.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         consumerProps.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
         consumerProps.put(JsonDeserializer.TRUSTED_PACKAGES, "*");
+        consumerProps.put(JsonDeserializer.USE_TYPE_INFO_HEADERS, false);
+        consumerProps.put(JsonDeserializer.VALUE_DEFAULT_TYPE, "java.util.HashMap");
 
         DefaultKafkaConsumerFactory<String, Map<String, Object>> consumerFactory =
                 new DefaultKafkaConsumerFactory<>(consumerProps);

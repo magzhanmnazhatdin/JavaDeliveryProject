@@ -1,5 +1,6 @@
 package com.example.orderservice.controller;
 
+import com.example.orderservice.config.SecurityConfig;
 import com.example.orderservice.dto.order.*;
 import com.example.orderservice.entity.OrderStatus;
 import com.example.orderservice.entity.PaymentMethod;
@@ -10,11 +11,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.math.BigDecimal;
@@ -31,6 +32,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(OrderController.class)
+@Import(SecurityConfig.class)
 class OrderControllerIntegrationTest {
 
     @Autowired
@@ -78,7 +80,8 @@ class OrderControllerIntegrationTest {
         mockMvc.perform(post("/api/orders")
                         .with(jwt().jwt(jwt -> jwt
                                 .subject(customerId.toString())
-                                .claim("realm_access", Map.of("roles", List.of("CUSTOMER")))))
+                                .claim("realm_access", Map.of("roles", List.of("CUSTOMER"))))
+                                .authorities(new SimpleGrantedAuthority("ROLE_CUSTOMER")))
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
@@ -123,7 +126,8 @@ class OrderControllerIntegrationTest {
         mockMvc.perform(get("/api/orders/{orderId}", orderId)
                         .with(jwt().jwt(jwt -> jwt
                                 .subject(UUID.randomUUID().toString())
-                                .claim("realm_access", Map.of("roles", List.of("ADMIN"))))))
+                                .claim("realm_access", Map.of("roles", List.of("ADMIN"))))
+                                .authorities(new SimpleGrantedAuthority("ROLE_ADMIN"))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(orderId.toString()))
                 .andExpect(jsonPath("$.status").value("PENDING"));
@@ -147,7 +151,8 @@ class OrderControllerIntegrationTest {
         mockMvc.perform(get("/api/orders/my-orders")
                         .with(jwt().jwt(jwt -> jwt
                                 .subject(customerId.toString())
-                                .claim("realm_access", Map.of("roles", List.of("CUSTOMER"))))))
+                                .claim("realm_access", Map.of("roles", List.of("CUSTOMER"))))
+                                .authorities(new SimpleGrantedAuthority("ROLE_CUSTOMER"))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content").isArray())
                 .andExpect(jsonPath("$.content[0].status").value("PENDING"));
@@ -172,7 +177,8 @@ class OrderControllerIntegrationTest {
         mockMvc.perform(patch("/api/orders/{orderId}/status", orderId)
                         .with(jwt().jwt(jwt -> jwt
                                 .subject(UUID.randomUUID().toString())
-                                .claim("realm_access", Map.of("roles", List.of("RESTAURANT")))))
+                                .claim("realm_access", Map.of("roles", List.of("RESTAURANT"))))
+                                .authorities(new SimpleGrantedAuthority("ROLE_RESTAURANT")))
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
@@ -191,7 +197,8 @@ class OrderControllerIntegrationTest {
         mockMvc.perform(patch("/api/orders/{orderId}/status", orderId)
                         .with(jwt().jwt(jwt -> jwt
                                 .subject(UUID.randomUUID().toString())
-                                .claim("realm_access", Map.of("roles", List.of("CUSTOMER")))))
+                                .claim("realm_access", Map.of("roles", List.of("CUSTOMER"))))
+                                .authorities(new SimpleGrantedAuthority("ROLE_CUSTOMER")))
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
@@ -219,7 +226,8 @@ class OrderControllerIntegrationTest {
         mockMvc.perform(post("/api/orders/{orderId}/cancel", orderId)
                         .with(jwt().jwt(jwt -> jwt
                                 .subject(customerId.toString())
-                                .claim("realm_access", Map.of("roles", List.of("CUSTOMER")))))
+                                .claim("realm_access", Map.of("roles", List.of("CUSTOMER"))))
+                                .authorities(new SimpleGrantedAuthority("ROLE_CUSTOMER")))
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
@@ -242,7 +250,8 @@ class OrderControllerIntegrationTest {
         mockMvc.perform(get("/api/orders/status/{status}", OrderStatus.PENDING)
                         .with(jwt().jwt(jwt -> jwt
                                 .subject(UUID.randomUUID().toString())
-                                .claim("realm_access", Map.of("roles", List.of("ADMIN"))))))
+                                .claim("realm_access", Map.of("roles", List.of("ADMIN"))))
+                                .authorities(new SimpleGrantedAuthority("ROLE_ADMIN"))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content").isArray());
     }
@@ -251,7 +260,7 @@ class OrderControllerIntegrationTest {
     @DisplayName("Should return 400 for invalid request")
     void createOrder_InvalidRequest_BadRequest() throws Exception {
         CreateOrderRequest request = CreateOrderRequest.builder()
-                .restaurantId(null) // Invalid: null restaurant
+                .restaurantId(null)
                 .deliveryAddress("")
                 .items(List.of())
                 .build();
@@ -259,7 +268,8 @@ class OrderControllerIntegrationTest {
         mockMvc.perform(post("/api/orders")
                         .with(jwt().jwt(jwt -> jwt
                                 .subject(UUID.randomUUID().toString())
-                                .claim("realm_access", Map.of("roles", List.of("CUSTOMER")))))
+                                .claim("realm_access", Map.of("roles", List.of("CUSTOMER"))))
+                                .authorities(new SimpleGrantedAuthority("ROLE_CUSTOMER")))
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
