@@ -1,0 +1,54 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: order-service-test
+
+  datasource:
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.H2Dialect
+
+  flyway:
+    enabled: false
+
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: order-service-test-group
+      auto-offset-reset: earliest
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8180/realms/delivery-realm
+          jwk-set-uri: http://localhost:8180/realms/delivery-realm/protocol/openid-connect/certs
+
+app:
+  kafka:
+    topics:
+      order-events: order-events-test
+      restaurant-events: restaurant-events-test
+      delivery-events: delivery-events-test
+      payment-events: payment-events-test
+
+logging:
+  level:
+    com.example.orderservice: DEBUG
+    org.springframework.kafka: WARN
+    org.springframework.security: WARN
