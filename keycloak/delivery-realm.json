@@ -1,0 +1,222 @@
+{
+  "realm": "delivery-realm",
+  "enabled": true,
+  "sslRequired": "external",
+  "registrationAllowed": true,
+  "loginWithEmailAllowed": true,
+  "duplicateEmailsAllowed": false,
+  "resetPasswordAllowed": true,
+  "editUsernameAllowed": false,
+  "bruteForceProtected": true,
+  "accessTokenLifespan": 300,
+  "refreshTokenMaxReuse": 0,
+  "ssoSessionIdleTimeout": 1800,
+  "ssoSessionMaxLifespan": 36000,
+  "roles": {
+    "realm": [
+      {
+        "name": "CUSTOMER",
+        "description": "Regular customer who can place orders"
+      },
+      {
+        "name": "RESTAURANT_OWNER",
+        "description": "Restaurant owner who can manage their restaurant"
+      },
+      {
+        "name": "COURIER",
+        "description": "Delivery courier"
+      },
+      {
+        "name": "ADMIN",
+        "description": "System administrator"
+      }
+    ]
+  },
+  "clients": [
+    {
+      "clientId": "delivery-app",
+      "name": "Delivery Application",
+      "description": "Main delivery application client",
+      "enabled": true,
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": true,
+      "serviceAccountsEnabled": false,
+      "redirectUris": [
+        "http://localhost:3000/*",
+        "http://localhost:8080/*"
+      ],
+      "webOrigins": [
+        "http://localhost:3000",
+        "http://localhost:8080"
+      ],
+      "defaultClientScopes": [
+        "web-origins",
+        "profile",
+        "roles",
+        "email"
+      ],
+      "optionalClientScopes": [
+        "address",
+        "phone",
+        "offline_access"
+      ]
+    },
+    {
+      "clientId": "api-gateway",
+      "name": "API Gateway Service",
+      "description": "API Gateway service client",
+      "enabled": true,
+      "publicClient": false,
+      "standardFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": true,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "api-gateway-secret",
+      "defaultClientScopes": [
+        "web-origins",
+        "profile",
+        "roles",
+        "email"
+      ]
+    },
+    {
+      "clientId": "order-service",
+      "name": "Order Service",
+      "description": "Order management service client",
+      "enabled": true,
+      "publicClient": false,
+      "standardFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": true,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "order-service-secret",
+      "defaultClientScopes": [
+        "web-origins",
+        "profile",
+        "roles",
+        "email"
+      ]
+    },
+    {
+      "clientId": "restaurant-service",
+      "name": "Restaurant Service",
+      "description": "Restaurant management service client",
+      "enabled": true,
+      "publicClient": false,
+      "standardFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": true,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "restaurant-service-secret",
+      "defaultClientScopes": [
+        "web-origins",
+        "profile",
+        "roles",
+        "email"
+      ]
+    },
+    {
+      "clientId": "user-service",
+      "name": "User Service",
+      "description": "User management service client",
+      "enabled": true,
+      "publicClient": false,
+      "standardFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": true,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "user-service-secret",
+      "defaultClientScopes": [
+        "web-origins",
+        "profile",
+        "roles",
+        "email"
+      ]
+    },
+    {
+      "clientId": "delivery-service",
+      "name": "Delivery Service",
+      "description": "Delivery management service client",
+      "enabled": true,
+      "publicClient": false,
+      "standardFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": true,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "delivery-service-secret",
+      "defaultClientScopes": [
+        "web-origins",
+        "profile",
+        "roles",
+        "email"
+      ]
+    }
+  ],
+  "users": [
+    {
+      "username": "customer1",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "John",
+      "lastName": "Customer",
+      "email": "customer1@example.com",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "password123",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["CUSTOMER"]
+    },
+    {
+      "username": "restaurant_owner1",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Mike",
+      "lastName": "Owner",
+      "email": "owner1@example.com",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "password123",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["RESTAURANT_OWNER"]
+    },
+    {
+      "username": "courier1",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Alex",
+      "lastName": "Courier",
+      "email": "courier1@example.com",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "password123",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["COURIER"]
+    },
+    {
+      "username": "admin",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "System",
+      "lastName": "Admin",
+      "email": "admin@example.com",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "admin123",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["ADMIN", "CUSTOMER"]
+    }
+  ]
+}

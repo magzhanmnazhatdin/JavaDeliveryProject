@@ -38,10 +38,15 @@ public class SecurityConfig {
 
                         // Swagger/OpenAPI endpoints
                         .pathMatchers(
+                                "/v3/api-docs",
                                 "/v3/api-docs/**",
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",
-                                "/**/v3/api-docs/**"
+                                "/api/orders/v3/api-docs",
+                                "/api/restaurants/v3/api-docs",
+                                "/api/users/v3/api-docs",
+                                "/api/deliveries/v3/api-docs",
+                                "/webjars/**"
                         ).permitAll()
 
                         // Public restaurant browsing

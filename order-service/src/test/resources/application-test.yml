@@ -24,10 +24,12 @@ spring:
     enabled: false
 
   kafka:
-    bootstrap-servers: localhost:9092
+    bootstrap-servers: ${spring.embedded.kafka.brokers:localhost:9093}
     consumer:
       group-id: order-service-test-group
       auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
@@ -37,15 +39,14 @@ spring:
       resourceserver:
         jwt:
           issuer-uri: http://localhost:8180/realms/delivery-realm
-          jwk-set-uri: http://localhost:8180/realms/delivery-realm/protocol/openid-connect/certs
 
 app:
   kafka:
     topics:
-      order-events: order-events-test
-      restaurant-events: restaurant-events-test
-      delivery-events: delivery-events-test
-      payment-events: payment-events-test
+      order-events: order-events
+      restaurant-events: restaurant-events
+      delivery-events: delivery-events
+      payment-events: payment-events
 
 logging:
   level:
