@@ -1,0 +1,191 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: api-gateway
+
+  cloud:
+    gateway:
+      default-filters:
+        - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowedOrigins:
+              - "*"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - PATCH
+              - DELETE
+              - OPTIONS
+            allowedHeaders:
+              - "*"
+            exposedHeaders:
+              - "Authorization"
+              - "Content-Type"
+            allowCredentials: false
+            maxAge: 3600
+
+      routes:
+        # Order Service Routes
+        - id: order-service
+          uri: http://order-service:8081
+          predicates:
+            - Path=/api/orders/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: orderServiceCircuitBreaker
+                fallbackUri: forward:/fallback/orders
+
+        - id: payment-service
+          uri: http://order-service:8081
+          predicates:
+            - Path=/api/payments/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: paymentServiceCircuitBreaker
+                fallbackUri: forward:/fallback/payments
+
+        # Restaurant Service Routes
+        - id: restaurant-service
+          uri: http://restaurant-service:8082
+          predicates:
+            - Path=/api/restaurants/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: restaurantServiceCircuitBreaker
+                fallbackUri: forward:/fallback/restaurants
+
+        - id: menu-service
+          uri: http://restaurant-service:8082
+          predicates:
+            - Path=/api/menu-items/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: menuServiceCircuitBreaker
+                fallbackUri: forward:/fallback/menu
+
+        - id: restaurant-orders-service
+          uri: http://restaurant-service:8082
+          predicates:
+            - Path=/api/restaurant-orders/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: restaurantOrdersCircuitBreaker
+                fallbackUri: forward:/fallback/restaurant-orders
+
+        # User Service Routes
+        - id: user-service
+          uri: http://user-service:8083
+          predicates:
+            - Path=/api/users/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: userServiceCircuitBreaker
+                fallbackUri: forward:/fallback/users
+
+        - id: address-service
+          uri: http://user-service:8083
+          predicates:
+            - Path=/api/addresses/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: addressServiceCircuitBreaker
+                fallbackUri: forward:/fallback/addresses
+
+        - id: preferences-service
+          uri: http://user-service:8083
+          predicates:
+            - Path=/api/preferences/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: preferencesServiceCircuitBreaker
+                fallbackUri: forward:/fallback/preferences
+
+        - id: favorites-service
+          uri: http://user-service:8083
+          predicates:
+            - Path=/api/favorites/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: favoritesServiceCircuitBreaker
+                fallbackUri: forward:/fallback/favorites
+
+        # Delivery Service Routes
+        - id: courier-service
+          uri: http://delivery-service:8084
+          predicates:
+            - Path=/api/couriers/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: courierServiceCircuitBreaker
+                fallbackUri: forward:/fallback/couriers
+
+        - id: delivery-service
+          uri: http://delivery-service:8084
+          predicates:
+            - Path=/api/deliveries/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: deliveryServiceCircuitBreaker
+                fallbackUri: forward:/fallback/deliveries
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI:http://keycloak:8080/realms/delivery-realm}
+          jwk-set-uri: ${SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI:http://keycloak:8080/realms/delivery-realm/protocol/openid-connect/certs}
+
+  data:
+    redis:
+      host: ${SPRING_DATA_REDIS_HOST:redis}
+      port: ${SPRING_DATA_REDIS_PORT:6379}
+      timeout: 2000ms
+
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        slidingWindowSize: 10
+        minimumNumberOfCalls: 5
+        permittedNumberOfCallsInHalfOpenState: 3
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+        waitDurationInOpenState: 5s
+        failureRateThreshold: 50
+
+  timelimiter:
+    configs:
+      default:
+        timeoutDuration: 10s
+
+logging:
+  level:
+    org.springframework.cloud.gateway: INFO
+    org.springframework.security: WARN
+    com.example.apigateway: INFO
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,gateway
+  endpoint:
+    health:
+      show-details: always
+    gateway:
+      enabled: true
