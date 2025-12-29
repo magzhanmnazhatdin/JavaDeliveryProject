@@ -157,6 +157,15 @@ spring:
       port: ${SPRING_DATA_REDIS_PORT:6379}
       timeout: 2000ms
 
+# Keycloak Configuration
+keycloak:
+  auth-server-url: ${KEYCLOAK_AUTH_SERVER_URL:http://keycloak:8080}
+  realm: ${KEYCLOAK_REALM:delivery-realm}
+  client-id: ${KEYCLOAK_CLIENT_ID:delivery-app}
+  admin:
+    username: ${KEYCLOAK_ADMIN_USERNAME:admin}
+    password: ${KEYCLOAK_ADMIN_PASSWORD:admin}
+
 resilience4j:
   circuitbreaker:
     configs:

@@ -18,6 +18,11 @@ services:
       RESTAURANT_SERVICE_URL: http://restaurant-service:8082
       USER_SERVICE_URL: http://user-service:8083
       DELIVERY_SERVICE_URL: http://delivery-service:8084
+      KEYCLOAK_AUTH_SERVER_URL: http://keycloak:8080
+      KEYCLOAK_REALM: delivery-realm
+      KEYCLOAK_CLIENT_ID: delivery-app
+      KEYCLOAK_ADMIN_USERNAME: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
     networks:
       - delivery-network
     restart: on-failure
