@@ -13,6 +13,7 @@ A microservice-based food delivery system built with Spring Boot, demonstrating 
 - [Kafka Events](#-kafka-events)
 - [Database Schema](#-database-schema)
 - [Testing](#-testing)
+- [Additional Documentation](#-additional-documentation)
 
 ---
 
@@ -690,6 +691,23 @@ JavaDeliveryProject/
 - `default` - Local development
 - `docker` - Docker environment
 - `test` - Testing environment
+
+---
+
+## 📚 Additional Documentation
+
+For more detailed information, see the following guides in the `docs/` directory:
+
+| Document | Description |
+|----------|-------------|
+| [ARCHITECTURE.md](docs/ARCHITECTURE.md) | System architecture diagrams and component details |
+| [DATABASE_ERD.md](docs/DATABASE_ERD.md) | Entity-Relationship diagrams for all databases |
+| [KAFKA_EVENTS.md](docs/KAFKA_EVENTS.md) | Kafka topics, events, and message flow documentation |
+| [KEYCLOAK_AUTH.md](docs/KEYCLOAK_AUTH.md) | Authentication setup and OAuth2/JWT configuration |
+| [API_EXAMPLES.md](docs/API_EXAMPLES.md) | Practical API request examples with cURL |
+| [DOCKER_GUIDE.md](docs/DOCKER_GUIDE.md) | Complete Docker and Docker Compose guide |
+| [TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md) | Common issues and their solutions |
+| [DEVELOPMENT_GUIDE.md](docs/DEVELOPMENT_GUIDE.md) | Developer guide for contributing to the project |
 
 ---
 
