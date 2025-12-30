@@ -19,6 +19,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -35,17 +37,37 @@ public class RestaurantController {
     private final MenuItemService menuItemService;
 
     @PostMapping
-    @PreAuthorize("hasAnyRole('RESTAURANT', 'ADMIN')")
+    @PreAuthorize("isAuthenticated()")
     @SecurityRequirement(name = "bearerAuth")
     @Operation(summary = "Create a new restaurant", description = "Creates a new restaurant")
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Restaurant created successfully"),
-            @ApiResponse(responseCode = "400", description = "Invalid request")
+            @ApiResponse(responseCode = "400", description = "Invalid request"),
+            @ApiResponse(responseCode = "409", description = "User already has a restaurant")
     })
-    public ResponseEntity<RestaurantDto> createRestaurant(@Valid @RequestBody CreateRestaurantRequest request) {
+    public ResponseEntity<RestaurantDto> createRestaurant(
+            @AuthenticationPrincipal Jwt jwt,
+            @Valid @RequestBody CreateRestaurantRequest request) {
         log.info("REST request to create restaurant: {}", request.getName());
-        RestaurantDto restaurant = restaurantService.createRestaurant(request);
+
+        // If keycloakId is provided in the request, use it (for API Gateway calls)
+        // Otherwise, use the authenticated user's ID
+        String keycloakId = request.getKeycloakId();
+        if (keycloakId == null || keycloakId.isBlank()) {
+            keycloakId = jwt.getSubject();
+        }
+
+        RestaurantDto restaurant = restaurantService.createRestaurantForOwner(request, keycloakId);
         return ResponseEntity.status(HttpStatus.CREATED).body(restaurant);
+    }
+
+    @GetMapping("/me")
+    @PreAuthorize("hasAnyRole('RESTAURANT_OWNER', 'ADMIN')")
+    @SecurityRequirement(name = "bearerAuth")
+    @Operation(summary = "Get current restaurant", description = "Returns restaurant linked to current user")
+    public ResponseEntity<RestaurantDto> getMyRestaurant(@AuthenticationPrincipal Jwt jwt) {
+        RestaurantDto restaurant = restaurantService.getRestaurantByKeycloakId(jwt.getSubject());
+        return ResponseEntity.ok(restaurant);
     }
 
     @GetMapping("/{id}")
@@ -80,7 +102,7 @@ public class RestaurantController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasAnyRole('RESTAURANT', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('RESTAURANT_OWNER', 'ADMIN')")
     @SecurityRequirement(name = "bearerAuth")
     @Operation(summary = "Update restaurant", description = "Updates restaurant information")
     @ApiResponses({
@@ -96,7 +118,7 @@ public class RestaurantController {
     }
 
     @PatchMapping("/{id}/activate")
-    @PreAuthorize("hasAnyRole('RESTAURANT', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('RESTAURANT_OWNER', 'ADMIN')")
     @SecurityRequirement(name = "bearerAuth")
     @Operation(summary = "Activate restaurant", description = "Sets restaurant as active")
     public ResponseEntity<RestaurantDto> activateRestaurant(
@@ -107,7 +129,7 @@ public class RestaurantController {
     }
 
     @PatchMapping("/{id}/deactivate")
-    @PreAuthorize("hasAnyRole('RESTAURANT', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('RESTAURANT_OWNER', 'ADMIN')")
     @SecurityRequirement(name = "bearerAuth")
     @Operation(summary = "Deactivate restaurant", description = "Sets restaurant as inactive")
     public ResponseEntity<RestaurantDto> deactivateRestaurant(
@@ -158,7 +180,7 @@ public class RestaurantController {
     }
 
     @PostMapping("/{id}/menu")
-    @PreAuthorize("hasAnyRole('RESTAURANT', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('RESTAURANT_OWNER', 'ADMIN')")
     @SecurityRequirement(name = "bearerAuth")
     @Operation(summary = "Add menu item", description = "Adds a new menu item to the restaurant")
     @ApiResponses({
@@ -172,5 +194,14 @@ public class RestaurantController {
         log.info("REST request to add menu item to restaurant: {}", id);
         MenuItemDto menuItem = menuItemService.createMenuItem(id, request);
         return ResponseEntity.status(HttpStatus.CREATED).body(menuItem);
+    }
+
+    private boolean hasRole(Jwt jwt, String role) {
+        var realmAccess = jwt.getClaimAsMap("realm_access");
+        if (realmAccess == null) {
+            return false;
+        }
+        var roles = (List<?>) realmAccess.get("roles");
+        return roles != null && roles.contains(role);
     }
 }

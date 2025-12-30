@@ -11,6 +11,8 @@ public interface CourierService {
 
     CourierDto createCourier(CreateCourierRequest request);
 
+    CourierDto createCourierForUser(CreateCourierRequest request, String keycloakId);
+
     CourierDto getCourierById(UUID id);
 
     CourierDto getCourierByKeycloakId(String keycloakId);

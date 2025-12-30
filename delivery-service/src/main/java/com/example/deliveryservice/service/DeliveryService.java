@@ -23,6 +23,8 @@ public interface DeliveryService {
 
     List<DeliveryDto> getDeliveriesByStatus(DeliveryStatus status);
 
+    List<DeliveryDto> getAvailableDeliveries();
+
     List<DeliveryDto> getAllDeliveries();
 
     DeliveryDto assignCourier(UUID deliveryId, AssignCourierRequest request);

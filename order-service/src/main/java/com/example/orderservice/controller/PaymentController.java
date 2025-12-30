@@ -29,7 +29,7 @@ public class PaymentController {
     private final PaymentService paymentService;
 
     @PostMapping("/process")
-    @PreAuthorize("hasAnyRole('CUSTOMER', 'ADMIN')")
+    @PreAuthorize("isAuthenticated()")
     @Operation(summary = "Process a payment for an order")
     public ResponseEntity<PaymentDto> processPayment(
             @Valid @RequestBody ProcessPaymentRequest request
@@ -38,21 +38,21 @@ public class PaymentController {
     }
 
     @GetMapping("/{paymentId}")
-    @PreAuthorize("hasAnyRole('CUSTOMER', 'ADMIN')")
+    @PreAuthorize("isAuthenticated()")
     @Operation(summary = "Get payment by ID")
     public ResponseEntity<PaymentDto> getPayment(@PathVariable UUID paymentId) {
         return ResponseEntity.ok(paymentService.getPaymentById(paymentId));
     }
 
     @GetMapping("/order/{orderId}")
-    @PreAuthorize("hasAnyRole('CUSTOMER', 'RESTAURANT', 'ADMIN')")
+    @PreAuthorize("isAuthenticated()")
     @Operation(summary = "Get payment by order ID")
     public ResponseEntity<PaymentDto> getPaymentByOrderId(@PathVariable UUID orderId) {
         return ResponseEntity.ok(paymentService.getPaymentByOrderId(orderId));
     }
 
     @GetMapping("/my-payments")
-    @PreAuthorize("hasAnyRole('CUSTOMER', 'ADMIN')")
+    @PreAuthorize("isAuthenticated()")
     @Operation(summary = "Get current user's payments")
     public ResponseEntity<Page<PaymentDto>> getMyPayments(
             @AuthenticationPrincipal Jwt jwt,
@@ -63,7 +63,7 @@ public class PaymentController {
     }
 
     @PutMapping("/{paymentId}")
-    @PreAuthorize("hasAnyRole('CUSTOMER', 'ADMIN')")
+    @PreAuthorize("isAuthenticated()")
     @Operation(summary = "Update payment method (only for pending payments)")
     public ResponseEntity<PaymentDto> updatePayment(
             @PathVariable UUID paymentId,

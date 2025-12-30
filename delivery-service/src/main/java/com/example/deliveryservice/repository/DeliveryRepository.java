@@ -22,6 +22,9 @@ public interface DeliveryRepository extends JpaRepository<Delivery, UUID> {
 
     List<Delivery> findByStatus(DeliveryStatus status);
 
+    @Query("SELECT d FROM Delivery d WHERE d.status = 'PENDING' AND d.courier IS NULL")
+    List<Delivery> findAvailableDeliveries();
+
     @Query("SELECT d FROM Delivery d WHERE d.courier.id = :courierId AND d.status IN :statuses")
     List<Delivery> findByCourierIdAndStatusIn(
             @Param("courierId") UUID courierId,

@@ -42,7 +42,7 @@ class OrderEventsListenerTest {
     @DisplayName("Should process OrderAccepted event and create delivery")
     void handleOrderEvent_OrderAccepted_CreatesDelivery() throws Exception {
         OrderAcceptedEvent event = OrderAcceptedEvent.builder()
-                .eventType("OrderAccepted")
+                .eventType("ORDER_ACCEPTED")
                 .orderId(UUID.randomUUID())
                 .customerId(UUID.randomUUID())
                 .restaurantId(UUID.randomUUID())
@@ -72,7 +72,7 @@ class OrderEventsListenerTest {
     void handleOrderEvent_OrderReady_HandlesOrderReady() throws Exception {
         UUID orderId = UUID.randomUUID();
         String message = String.format(
-                "{\"eventType\":\"OrderReady\",\"orderId\":\"%s\",\"restaurantId\":\"%s\",\"readyAt\":\"%s\"}",
+                "{\"eventType\":\"ORDER_READY\",\"orderId\":\"%s\",\"restaurantId\":\"%s\",\"readyAt\":\"%s\"}",
                 orderId, UUID.randomUUID(), Instant.now().toString()
         );
 

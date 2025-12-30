@@ -29,7 +29,7 @@ public class OrderController {
     private final OrderService orderService;
 
     @PostMapping
-    @PreAuthorize("hasAnyRole('CUSTOMER', 'ADMIN')")
+    @PreAuthorize("isAuthenticated()")
     @Operation(summary = "Create a new order")
     public ResponseEntity<OrderDto> createOrder(
             @AuthenticationPrincipal Jwt jwt,
@@ -41,13 +41,13 @@ public class OrderController {
     }
 
     @GetMapping("/{orderId}")
-    @PreAuthorize("hasAnyRole('CUSTOMER', 'RESTAURANT', 'COURIER', 'ADMIN')")
+    @PreAuthorize("isAuthenticated()")
     @Operation(summary = "Get order by ID")
     public ResponseEntity<OrderDto> getOrder(
             @PathVariable UUID orderId,
             @AuthenticationPrincipal Jwt jwt
     ) {
-        if (hasRole(jwt, "ADMIN") || hasRole(jwt, "RESTAURANT") || hasRole(jwt, "COURIER")) {
+        if (hasRole(jwt, "ADMIN") || hasRole(jwt, "RESTAURANT_OWNER") || hasRole(jwt, "COURIER")) {
             return ResponseEntity.ok(orderService.getOrderById(orderId));
         }
         UUID customerId = UUID.fromString(jwt.getSubject());
@@ -55,7 +55,7 @@ public class OrderController {
     }
 
     @GetMapping("/my-orders")
-    @PreAuthorize("hasAnyRole('CUSTOMER', 'ADMIN')")
+    @PreAuthorize("isAuthenticated()")
     @Operation(summary = "Get current user's orders")
     public ResponseEntity<Page<OrderSummaryDto>> getMyOrders(
             @AuthenticationPrincipal Jwt jwt,
@@ -76,7 +76,7 @@ public class OrderController {
     }
 
     @GetMapping("/restaurant/{restaurantId}")
-    @PreAuthorize("hasAnyRole('RESTAURANT', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('RESTAURANT_OWNER', 'ADMIN')")
     @Operation(summary = "Get orders by restaurant ID")
     public ResponseEntity<Page<OrderSummaryDto>> getOrdersByRestaurant(
             @PathVariable UUID restaurantId,
@@ -86,7 +86,7 @@ public class OrderController {
     }
 
     @GetMapping("/restaurant/{restaurantId}/active")
-    @PreAuthorize("hasAnyRole('RESTAURANT', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('RESTAURANT_OWNER', 'ADMIN')")
     @Operation(summary = "Get active orders for a restaurant")
     public ResponseEntity<List<OrderSummaryDto>> getActiveOrdersByRestaurant(
             @PathVariable UUID restaurantId
@@ -105,7 +105,7 @@ public class OrderController {
     }
 
     @PatchMapping("/{orderId}/status")
-    @PreAuthorize("hasAnyRole('RESTAURANT', 'COURIER', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('RESTAURANT_OWNER', 'COURIER', 'ADMIN')")
     @Operation(summary = "Update order status")
     public ResponseEntity<OrderDto> updateOrderStatus(
             @PathVariable UUID orderId,
@@ -115,7 +115,7 @@ public class OrderController {
     }
 
     @PostMapping("/{orderId}/cancel")
-    @PreAuthorize("hasAnyRole('CUSTOMER', 'ADMIN')")
+    @PreAuthorize("isAuthenticated()")
     @Operation(summary = "Cancel an order")
     public ResponseEntity<OrderDto> cancelOrder(
             @PathVariable UUID orderId,
@@ -130,7 +130,7 @@ public class OrderController {
     }
 
     @PutMapping("/{orderId}")
-    @PreAuthorize("hasAnyRole('CUSTOMER', 'ADMIN')")
+    @PreAuthorize("isAuthenticated()")
     @Operation(summary = "Update order details (only for pending orders)")
     public ResponseEntity<OrderDto> updateOrder(
             @PathVariable UUID orderId,

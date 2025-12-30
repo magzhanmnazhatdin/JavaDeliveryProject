@@ -4,6 +4,7 @@ import com.example.restaurantservice.dto.restaurant.CreateRestaurantRequest;
 import com.example.restaurantservice.dto.restaurant.RestaurantDto;
 import com.example.restaurantservice.dto.restaurant.UpdateRestaurantRequest;
 import com.example.restaurantservice.entity.Restaurant;
+import com.example.restaurantservice.exception.ConflictException;
 import com.example.restaurantservice.exception.ResourceNotFoundException;
 import com.example.restaurantservice.mapper.RestaurantMapper;
 import com.example.restaurantservice.repository.RestaurantRepository;
@@ -33,6 +34,22 @@ public class RestaurantServiceImpl implements RestaurantService {
         Restaurant savedRestaurant = restaurantRepository.save(restaurant);
 
         log.info("Restaurant created with ID: {}", savedRestaurant.getId());
+        return restaurantMapper.toDto(savedRestaurant);
+    }
+
+    @Override
+    public RestaurantDto createRestaurantForOwner(CreateRestaurantRequest request, String keycloakId) {
+        log.info("Creating restaurant for owner: {}", keycloakId);
+
+        if (restaurantRepository.existsByKeycloakId(keycloakId)) {
+            throw new ConflictException("Restaurant already exists for this user");
+        }
+
+        Restaurant restaurant = restaurantMapper.toEntity(request);
+        restaurant.setKeycloakId(keycloakId);
+        Restaurant savedRestaurant = restaurantRepository.save(restaurant);
+
+        log.info("Restaurant created with ID: {} for owner: {}", savedRestaurant.getId(), keycloakId);
         return restaurantMapper.toDto(savedRestaurant);
     }
 

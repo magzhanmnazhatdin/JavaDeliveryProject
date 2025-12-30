@@ -42,6 +42,26 @@ public class CourierServiceImpl implements CourierService {
     }
 
     @Override
+    public CourierDto createCourierForUser(CreateCourierRequest request, String keycloakId) {
+        log.info("Creating courier for user: {}", keycloakId);
+
+        if (courierRepository.existsByKeycloakId(keycloakId)) {
+            throw new ConflictException("Courier already exists for this user");
+        }
+        if (courierRepository.existsByPhone(request.getPhone())) {
+            throw new ConflictException("Courier with phone " + request.getPhone() + " already exists");
+        }
+
+        Courier courier = courierMapper.toEntity(request);
+        courier.setKeycloakId(keycloakId);
+        courier.setStatus(CourierStatus.OFFLINE);
+        Courier savedCourier = courierRepository.save(courier);
+
+        log.info("Courier created with ID: {} for user: {}", savedCourier.getId(), keycloakId);
+        return courierMapper.toDto(savedCourier);
+    }
+
+    @Override
     @Transactional(readOnly = true)
     public CourierDto getCourierById(UUID id) {
         log.debug("Getting courier by ID: {}", id);

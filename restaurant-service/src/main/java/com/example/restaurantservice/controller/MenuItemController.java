@@ -42,7 +42,7 @@ public class MenuItemController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasAnyRole('RESTAURANT', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('RESTAURANT_OWNER', 'ADMIN')")
     @Operation(summary = "Update menu item", description = "Updates menu item information")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Menu item updated successfully"),
@@ -57,7 +57,7 @@ public class MenuItemController {
     }
 
     @PatchMapping("/{id}/availability")
-    @PreAuthorize("hasAnyRole('RESTAURANT', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('RESTAURANT_OWNER', 'ADMIN')")
     @Operation(summary = "Set menu item availability", description = "Sets menu item as available or unavailable")
     public ResponseEntity<MenuItemDto> setAvailability(
             @Parameter(description = "Menu item ID") @PathVariable UUID id,
@@ -68,7 +68,7 @@ public class MenuItemController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAnyRole('RESTAURANT', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('RESTAURANT_OWNER', 'ADMIN')")
     @Operation(summary = "Delete menu item", description = "Deletes a menu item")
     @ApiResponses({
             @ApiResponse(responseCode = "204", description = "Menu item deleted successfully"),

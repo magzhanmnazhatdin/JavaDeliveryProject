@@ -2,7 +2,9 @@ package com.example.deliveryservice.controller;
 
 import com.example.deliveryservice.dto.delivery.*;
 import com.example.deliveryservice.entity.DeliveryStatus;
+import com.example.deliveryservice.dto.courier.CourierDto;
 import com.example.deliveryservice.service.DeliveryService;
+import com.example.deliveryservice.service.CourierService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -15,6 +17,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -29,6 +33,7 @@ import java.util.UUID;
 public class DeliveryController {
 
     private final DeliveryService deliveryService;
+    private final CourierService courierService;
 
     @PostMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'RESTAURANT')")
@@ -57,6 +62,14 @@ public class DeliveryController {
         return ResponseEntity.ok(delivery);
     }
 
+    @GetMapping("/available")
+    @PreAuthorize("hasAnyRole('COURIER', 'ADMIN')")
+    @Operation(summary = "Get available deliveries", description = "Returns unassigned pending deliveries")
+    public ResponseEntity<List<DeliveryDto>> getAvailableDeliveries() {
+        List<DeliveryDto> deliveries = deliveryService.getAvailableDeliveries();
+        return ResponseEntity.ok(deliveries);
+    }
+
     @GetMapping("/order/{orderId}")
     @Operation(summary = "Get delivery by order ID", description = "Returns delivery details for a specific order")
     @ApiResponses({
@@ -77,6 +90,15 @@ public class DeliveryController {
             @Parameter(description = "Courier ID") @PathVariable UUID courierId) {
         log.debug("REST request to get deliveries for courier: {}", courierId);
         List<DeliveryDto> deliveries = deliveryService.getDeliveriesByCourierId(courierId);
+        return ResponseEntity.ok(deliveries);
+    }
+
+    @GetMapping("/courier/me")
+    @PreAuthorize("hasAnyRole('COURIER', 'ADMIN')")
+    @Operation(summary = "Get current courier deliveries", description = "Returns deliveries for current courier")
+    public ResponseEntity<List<DeliveryDto>> getMyDeliveries(@AuthenticationPrincipal Jwt jwt) {
+        CourierDto courier = courierService.getCourierByKeycloakId(jwt.getSubject());
+        List<DeliveryDto> deliveries = deliveryService.getDeliveriesByCourierId(courier.getId());
         return ResponseEntity.ok(deliveries);
     }
 
@@ -121,6 +143,20 @@ public class DeliveryController {
             @Parameter(description = "Delivery ID") @PathVariable UUID id,
             @Valid @RequestBody AssignCourierRequest request) {
         log.info("REST request to assign courier {} to delivery {}", request.getCourierId(), id);
+        DeliveryDto delivery = deliveryService.assignCourier(id, request);
+        return ResponseEntity.ok(delivery);
+    }
+
+    @PostMapping("/{id}/accept")
+    @PreAuthorize("hasAnyRole('COURIER', 'ADMIN')")
+    @Operation(summary = "Accept delivery", description = "Assigns current courier to delivery")
+    public ResponseEntity<DeliveryDto> acceptDelivery(
+            @Parameter(description = "Delivery ID") @PathVariable UUID id,
+            @AuthenticationPrincipal Jwt jwt) {
+        CourierDto courier = courierService.getCourierByKeycloakId(jwt.getSubject());
+        AssignCourierRequest request = AssignCourierRequest.builder()
+                .courierId(courier.getId())
+                .build();
         DeliveryDto delivery = deliveryService.assignCourier(id, request);
         return ResponseEntity.ok(delivery);
     }

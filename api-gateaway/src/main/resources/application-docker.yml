@@ -166,6 +166,13 @@ keycloak:
     username: ${KEYCLOAK_ADMIN_USERNAME:admin}
     password: ${KEYCLOAK_ADMIN_PASSWORD:admin}
 
+# Services Configuration
+services:
+  delivery-service:
+    url: ${DELIVERY_SERVICE_URL:http://delivery-service:8084}
+  restaurant-service:
+    url: ${RESTAURANT_SERVICE_URL:http://restaurant-service:8082}
+
 resilience4j:
   circuitbreaker:
     configs:

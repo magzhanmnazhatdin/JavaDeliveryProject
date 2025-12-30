@@ -19,7 +19,7 @@ public class OrderEventsListener {
     private final ObjectMapper objectMapper;
 
     @KafkaListener(
-            topics = "${app.kafka.topics.order-events}",
+            topics = "${app.kafka.topics.restaurant-events}",
             groupId = "${spring.kafka.consumer.group-id}"
     )
     public void handleOrderEvent(String message) {
@@ -30,8 +30,8 @@ public class OrderEventsListener {
             String eventType = jsonNode.has("eventType") ? jsonNode.get("eventType").asText() : "";
 
             switch (eventType) {
-                case "OrderAccepted" -> handleOrderAccepted(message);
-                case "OrderReady" -> handleOrderReady(message);
+                case "ORDER_ACCEPTED" -> handleOrderAccepted(message);
+                case "ORDER_READY" -> handleOrderReady(message);
                 default -> log.debug("Ignoring event type: {}", eventType);
             }
         } catch (Exception e) {

@@ -11,6 +11,8 @@ public interface RestaurantService {
 
     RestaurantDto createRestaurant(CreateRestaurantRequest request);
 
+    RestaurantDto createRestaurantForOwner(CreateRestaurantRequest request, String keycloakId);
+
     RestaurantDto getRestaurantById(UUID id);
 
     RestaurantDto getRestaurantByKeycloakId(String keycloakId);

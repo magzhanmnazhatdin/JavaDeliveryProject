@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -25,6 +27,7 @@ public class AuthResponse {
         private String email;
         private String firstName;
         private String lastName;
-        private String role;
+        private String role;           // Основная роль (для обратной совместимости)
+        private List<String> roles;    // Все роли пользователя
     }
 }

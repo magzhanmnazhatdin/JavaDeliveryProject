@@ -39,15 +39,18 @@ public class SecurityConfig {
                                 "/actuator/info"
                         ).permitAll()
 
-                        .requestMatchers(HttpMethod.POST, "/api/orders").hasAnyRole("CUSTOMER", "ADMIN")
-                        .requestMatchers(HttpMethod.GET, "/api/orders/my-orders").hasAnyRole("CUSTOMER", "ADMIN")
+                        // Order creation - any authenticated user can create orders
+                        .requestMatchers(HttpMethod.POST, "/api/orders").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/orders/my-orders").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/orders/customer/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/orders/status/**").hasRole("ADMIN")
 
-                        .requestMatchers(HttpMethod.GET, "/api/orders/restaurant/**").hasAnyRole("RESTAURANT", "ADMIN")
-                        .requestMatchers(HttpMethod.PATCH, "/api/orders/*/status").hasAnyRole("RESTAURANT", "COURIER", "ADMIN")
+                        // Restaurant order management
+                        .requestMatchers(HttpMethod.GET, "/api/orders/restaurant/**").hasAnyRole("RESTAURANT_OWNER", "ADMIN")
+                        .requestMatchers(HttpMethod.PATCH, "/api/orders/*/status").hasAnyRole("RESTAURANT_OWNER", "COURIER", "ADMIN")
 
-                        .requestMatchers(HttpMethod.POST, "/api/payments/process").hasAnyRole("CUSTOMER", "ADMIN")
+                        // Payment processing - any authenticated user can process payments
+                        .requestMatchers(HttpMethod.POST, "/api/payments/process").authenticated()
                         .requestMatchers(HttpMethod.POST, "/api/payments/*/refund").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/payments/*/cancel").hasRole("ADMIN")
 

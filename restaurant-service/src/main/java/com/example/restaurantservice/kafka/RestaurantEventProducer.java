@@ -16,24 +16,24 @@ public class RestaurantEventProducer {
 
     private final KafkaTemplate<String, Object> kafkaTemplate;
 
-    @Value("${app.kafka.topics.order-events}")
-    private String orderEventsTopic;
+    @Value("${app.kafka.topics.restaurant-events}")
+    private String restaurantEventsTopic;
 
     public void sendOrderAcceptedEvent(OrderAcceptedEvent event) {
         log.info("Sending OrderAcceptedEvent for order: {}", event.getOrderId());
-        kafkaTemplate.send(orderEventsTopic, event.getOrderId().toString(), event);
+        kafkaTemplate.send(restaurantEventsTopic, event.getOrderId().toString(), event);
         log.debug("OrderAcceptedEvent sent successfully");
     }
 
     public void sendOrderRejectedEvent(OrderRejectedEvent event) {
         log.info("Sending OrderRejectedEvent for order: {}", event.getOrderId());
-        kafkaTemplate.send(orderEventsTopic, event.getOrderId().toString(), event);
+        kafkaTemplate.send(restaurantEventsTopic, event.getOrderId().toString(), event);
         log.debug("OrderRejectedEvent sent successfully");
     }
 
     public void sendOrderReadyEvent(OrderReadyEvent event) {
         log.info("Sending OrderReadyEvent for order: {}", event.getOrderId());
-        kafkaTemplate.send(orderEventsTopic, event.getOrderId().toString(), event);
+        kafkaTemplate.send(restaurantEventsTopic, event.getOrderId().toString(), event);
         log.debug("OrderReadyEvent sent successfully");
     }
 }

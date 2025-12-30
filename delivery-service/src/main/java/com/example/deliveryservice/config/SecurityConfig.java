@@ -45,9 +45,16 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.DELETE, "/api/couriers/**").hasRole("ADMIN")
 
                         // Courier endpoints - courier or admin
+                        .requestMatchers(HttpMethod.GET, "/api/couriers/me").hasAnyRole("COURIER", "ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/couriers/me").hasAnyRole("COURIER", "ADMIN")
+                        .requestMatchers(HttpMethod.PATCH, "/api/couriers/me/toggle-availability").hasAnyRole("COURIER", "ADMIN")
+                        .requestMatchers(HttpMethod.PATCH, "/api/couriers/me/location").hasAnyRole("COURIER", "ADMIN")
                         .requestMatchers(HttpMethod.PATCH, "/api/couriers/*/status").hasAnyRole("COURIER", "ADMIN")
                         .requestMatchers(HttpMethod.PATCH, "/api/couriers/*/location").hasAnyRole("COURIER", "ADMIN")
                         .requestMatchers(HttpMethod.PATCH, "/api/deliveries/*/status").hasAnyRole("COURIER", "ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/deliveries/available").hasAnyRole("COURIER", "ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/deliveries/courier/me").hasAnyRole("COURIER", "ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/deliveries/*/accept").hasAnyRole("COURIER", "ADMIN")
 
                         // Customer endpoints
                         .requestMatchers(HttpMethod.GET, "/api/deliveries/customer/**").hasAnyRole("CUSTOMER", "ADMIN")

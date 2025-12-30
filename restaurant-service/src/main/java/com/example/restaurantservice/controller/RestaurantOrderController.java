@@ -27,7 +27,7 @@ import java.util.UUID;
 @Slf4j
 @Tag(name = "Restaurant Orders", description = "Restaurant order management API")
 @SecurityRequirement(name = "bearerAuth")
-@PreAuthorize("hasAnyRole('RESTAURANT', 'ADMIN')")
+@PreAuthorize("hasAnyRole('RESTAURANT_OWNER', 'ADMIN')")
 public class RestaurantOrderController {
 
     private final RestaurantOrderService orderService;

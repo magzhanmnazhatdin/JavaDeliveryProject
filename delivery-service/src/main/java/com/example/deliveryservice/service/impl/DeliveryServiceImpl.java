@@ -126,6 +126,15 @@ public class DeliveryServiceImpl implements DeliveryService {
 
     @Override
     @Transactional(readOnly = true)
+    public List<DeliveryDto> getAvailableDeliveries() {
+        log.debug("Getting available deliveries");
+        return deliveryRepository.findAvailableDeliveries().stream()
+                .map(deliveryMapper::toDto)
+                .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public List<DeliveryDto> getAllDeliveries() {
         log.debug("Getting all deliveries");
         return deliveryRepository.findAll().stream()
@@ -211,7 +220,7 @@ public class DeliveryServiceImpl implements DeliveryService {
 
         // Publish status changed event
         DeliveryStatusChangedEvent event = DeliveryStatusChangedEvent.builder()
-                .eventType("DeliveryStatusChanged")
+                .eventType("DELIVERY_STATUS_CHANGED")
                 .deliveryId(updatedDelivery.getId())
                 .orderId(updatedDelivery.getOrderId())
                 .courierId(updatedDelivery.getCourier() != null ? updatedDelivery.getCourier().getId() : null)
@@ -316,7 +325,7 @@ public class DeliveryServiceImpl implements DeliveryService {
 
         // Publish courier assigned event
         CourierAssignedEvent event = CourierAssignedEvent.builder()
-                .eventType("CourierAssigned")
+                .eventType("COURIER_ASSIGNED")
                 .deliveryId(delivery.getId())
                 .orderId(delivery.getOrderId())
                 .courierId(courier.getId())

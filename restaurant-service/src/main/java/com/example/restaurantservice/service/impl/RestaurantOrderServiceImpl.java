@@ -135,7 +135,7 @@ public class RestaurantOrderServiceImpl implements RestaurantOrderService {
         // Publish OrderAcceptedEvent
         Restaurant restaurant = order.getRestaurant();
         OrderAcceptedEvent event = OrderAcceptedEvent.builder()
-                .eventType("OrderAccepted")
+                .eventType("ORDER_ACCEPTED")
                 .orderId(order.getOrderId())
                 .customerId(order.getCustomerId())
                 .restaurantId(restaurant.getId())
@@ -171,7 +171,7 @@ public class RestaurantOrderServiceImpl implements RestaurantOrderService {
 
         // Publish OrderRejectedEvent
         OrderRejectedEvent event = OrderRejectedEvent.builder()
-                .eventType("OrderRejected")
+                .eventType("ORDER_REJECTED")
                 .orderId(order.getOrderId())
                 .restaurantId(order.getRestaurant().getId())
                 .rejectionReason(request.getReason())
@@ -215,7 +215,7 @@ public class RestaurantOrderServiceImpl implements RestaurantOrderService {
         // Publish OrderReadyEvent
         Restaurant restaurant = order.getRestaurant();
         OrderReadyEvent event = OrderReadyEvent.builder()
-                .eventType("OrderReady")
+                .eventType("ORDER_READY")
                 .orderId(order.getOrderId())
                 .restaurantId(restaurant.getId())
                 .restaurantName(restaurant.getName())

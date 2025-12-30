@@ -45,7 +45,7 @@ class OrderEventsListenerTest {
     void handleOrderEvent_OrderCreated_CreatesOrder() throws Exception {
         UUID restaurantId = UUID.randomUUID();
         OrderCreatedEvent event = OrderCreatedEvent.builder()
-                .eventType("OrderCreated")
+                .eventType("ORDER_CREATED")
                 .orderId(UUID.randomUUID())
                 .customerId(UUID.randomUUID())
                 .restaurantId(restaurantId)
@@ -95,7 +95,7 @@ class OrderEventsListenerTest {
     @Test
     @DisplayName("Should ignore non-OrderCreated events")
     void handleOrderEvent_OtherEvents_Ignores() throws Exception {
-        String message = "{\"eventType\":\"OrderAccepted\",\"orderId\":\"" + UUID.randomUUID() + "\"}";
+        String message = "{\"eventType\":\"ORDER_ACCEPTED\",\"orderId\":\"" + UUID.randomUUID() + "\"}";
 
         orderEventsListener.handleOrderEvent(message);
 

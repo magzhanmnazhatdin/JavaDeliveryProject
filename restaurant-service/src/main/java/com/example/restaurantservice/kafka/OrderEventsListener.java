@@ -30,7 +30,7 @@ public class OrderEventsListener {
             JsonNode jsonNode = objectMapper.readTree(message);
             String eventType = jsonNode.has("eventType") ? jsonNode.get("eventType").asText() : "";
 
-            if ("OrderCreated".equals(eventType)) {
+            if ("ORDER_CREATED".equals(eventType)) {
                 handleOrderCreated(message);
             } else {
                 log.debug("Ignoring event type: {}", eventType);

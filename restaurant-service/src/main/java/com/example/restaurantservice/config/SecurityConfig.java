@@ -40,23 +40,26 @@ public class SecurityConfig {
                                 "/actuator/info"
                         ).permitAll()
 
+                        // Current restaurant (must be authenticated)
+                        .requestMatchers(HttpMethod.GET, "/api/restaurants/me").hasAnyRole("RESTAURANT_OWNER", "ADMIN")
+
                         // Public restaurant browsing
                         .requestMatchers(HttpMethod.GET, "/api/restaurants").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/restaurants/*/menu").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/restaurants/*").permitAll()
 
                         // Restaurant management - restaurant owners only
-                        .requestMatchers(HttpMethod.POST, "/api/restaurants").hasAnyRole("RESTAURANT", "ADMIN")
-                        .requestMatchers(HttpMethod.PUT, "/api/restaurants/*").hasAnyRole("RESTAURANT", "ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/restaurants").authenticated()
+                        .requestMatchers(HttpMethod.PUT, "/api/restaurants/*").hasAnyRole("RESTAURANT_OWNER", "ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/restaurants/*").hasRole("ADMIN")
 
                         // Menu management - restaurant owners
-                        .requestMatchers(HttpMethod.POST, "/api/restaurants/*/menu").hasAnyRole("RESTAURANT", "ADMIN")
-                        .requestMatchers(HttpMethod.PUT, "/api/menu-items/*").hasAnyRole("RESTAURANT", "ADMIN")
-                        .requestMatchers(HttpMethod.DELETE, "/api/menu-items/*").hasAnyRole("RESTAURANT", "ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/restaurants/*/menu").hasAnyRole("RESTAURANT_OWNER", "ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/menu-items/*").hasAnyRole("RESTAURANT_OWNER", "ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/menu-items/*").hasAnyRole("RESTAURANT_OWNER", "ADMIN")
 
                         // Order management - restaurant owners
-                        .requestMatchers("/api/restaurant-orders/**").hasAnyRole("RESTAURANT", "ADMIN")
+                        .requestMatchers("/api/restaurant-orders/**").hasAnyRole("RESTAURANT_OWNER", "ADMIN")
 
                         // All other endpoints require authentication
                         .anyRequest().authenticated()
