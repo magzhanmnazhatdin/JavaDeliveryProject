@@ -85,6 +85,15 @@ public class OrderController {
         return ResponseEntity.ok(orderService.getOrdersByRestaurant(restaurantId, pageable));
     }
 
+    @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Get all orders (Admin only)")
+    public ResponseEntity<Page<OrderSummaryDto>> getAllOrders(
+            @PageableDefault(size = 20) Pageable pageable
+    ) {
+        return ResponseEntity.ok(orderService.getAllOrders(pageable));
+    }
+
     @GetMapping("/restaurant/{restaurantId}/active")
     @PreAuthorize("hasAnyRole('RESTAURANT_OWNER', 'ADMIN')")
     @Operation(summary = "Get active orders for a restaurant")

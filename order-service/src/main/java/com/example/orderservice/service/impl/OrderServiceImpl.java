@@ -124,6 +124,13 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional(readOnly = true)
+    public Page<OrderSummaryDto> getAllOrders(Pageable pageable) {
+        return orderRepository.findAll(pageable)
+                .map(orderMapper::toSummaryDto);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public Page<OrderSummaryDto> getOrdersByStatus(OrderStatus status, Pageable pageable) {
         return orderRepository.findByStatus(status, pageable)
                 .map(orderMapper::toSummaryDto);

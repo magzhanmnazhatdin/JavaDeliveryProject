@@ -20,6 +20,8 @@ public interface OrderService {
 
     Page<OrderSummaryDto> getOrdersByRestaurant(UUID restaurantId, Pageable pageable);
 
+    Page<OrderSummaryDto> getAllOrders(Pageable pageable);
+
     Page<OrderSummaryDto> getOrdersByStatus(OrderStatus status, Pageable pageable);
 
     List<OrderSummaryDto> getActiveOrdersByRestaurant(UUID restaurantId);
