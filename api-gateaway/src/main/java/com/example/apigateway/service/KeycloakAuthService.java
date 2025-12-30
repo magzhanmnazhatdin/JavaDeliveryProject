@@ -261,7 +261,7 @@ public class KeycloakAuthService {
     /**
      * Become a courier - adds COURIER role and creates courier profile
      */
-    public Mono<AuthResponse> becomeCourier(BecomeCourierRequest request, String accessToken) {
+    public Mono<AuthResponse> becomeCourier(BecomeCourierRequest request, String accessToken, String refreshToken) {
         String userId = extractUserIdFromToken(accessToken);
         if (userId == null) {
             return Mono.error(new RuntimeException("Invalid access token"));
@@ -280,7 +280,9 @@ public class KeycloakAuthService {
                         })
                 )
                 .then(createCourierProfile(request, userId, accessToken))
-                .then(refreshTokenFromAccessToken(accessToken))
+                .then(refreshToken != null && !refreshToken.isBlank()
+                        ? refreshToken(refreshToken)
+                        : refreshTokenFromAccessToken(accessToken))
                 .onErrorResume(e -> {
                     log.error("Failed to become courier: {}", e.getMessage());
                     return Mono.error(new RuntimeException("Failed to become courier: " + e.getMessage()));
@@ -290,7 +292,7 @@ public class KeycloakAuthService {
     /**
      * Become a restaurant owner - adds RESTAURANT_OWNER role and creates restaurant
      */
-    public Mono<AuthResponse> becomeRestaurant(BecomeRestaurantRequest request, String accessToken) {
+    public Mono<AuthResponse> becomeRestaurant(BecomeRestaurantRequest request, String accessToken, String refreshToken) {
         String userId = extractUserIdFromToken(accessToken);
         if (userId == null) {
             return Mono.error(new RuntimeException("Invalid access token"));
@@ -309,7 +311,9 @@ public class KeycloakAuthService {
                         })
                 )
                 .then(createRestaurantProfile(request, userId, accessToken))
-                .then(refreshTokenFromAccessToken(accessToken))
+                .then(refreshToken != null && !refreshToken.isBlank()
+                        ? refreshToken(refreshToken)
+                        : refreshTokenFromAccessToken(accessToken))
                 .onErrorResume(e -> {
                     log.error("Failed to become restaurant owner: {}", e.getMessage());
                     return Mono.error(new RuntimeException("Failed to become restaurant owner: " + e.getMessage()));

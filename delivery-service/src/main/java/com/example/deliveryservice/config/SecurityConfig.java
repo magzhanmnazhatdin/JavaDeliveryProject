@@ -40,8 +40,10 @@ public class SecurityConfig {
                                 "/actuator/info"
                         ).permitAll()
 
+                        // Courier creation - any authenticated user can become a courier
+                        .requestMatchers(HttpMethod.POST, "/api/couriers").authenticated()
+
                         // Admin only endpoints
-                        .requestMatchers(HttpMethod.POST, "/api/couriers").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/couriers/**").hasRole("ADMIN")
 
                         // Courier endpoints - courier or admin

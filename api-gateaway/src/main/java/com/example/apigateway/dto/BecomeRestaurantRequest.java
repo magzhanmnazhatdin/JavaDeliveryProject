@@ -51,4 +51,6 @@ public class BecomeRestaurantRequest {
     private LocalTime openingTime;
 
     private LocalTime closingTime;
+
+    private String refreshToken;
 }

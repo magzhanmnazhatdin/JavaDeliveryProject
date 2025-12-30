@@ -82,7 +82,8 @@ public class AuthController {
     @PostMapping("/become-courier")
     public Mono<ResponseEntity<Object>> becomeCourier(
             @Valid @RequestBody BecomeCourierRequest request,
-            @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader) {
+            @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader,
+            @RequestHeader(value = "X-Refresh-Token", required = false) String refreshTokenHeader) {
         log.info("Become courier request");
 
         String accessToken = extractToken(authHeader);
@@ -91,7 +92,10 @@ public class AuthController {
                     .body(Map.of("message", "Missing or invalid authorization header")));
         }
 
-        return authService.becomeCourier(request, accessToken)
+        // Get refresh token from header or request body
+        String refreshToken = refreshTokenHeader != null ? refreshTokenHeader : request.getRefreshToken();
+
+        return authService.becomeCourier(request, accessToken, refreshToken)
                 .<Object>map(response -> response)
                 .map(response -> ResponseEntity.status(HttpStatus.CREATED).body(response))
                 .onErrorResume(e -> {
@@ -108,7 +112,8 @@ public class AuthController {
     @PostMapping("/become-restaurant")
     public Mono<ResponseEntity<Object>> becomeRestaurant(
             @Valid @RequestBody BecomeRestaurantRequest request,
-            @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader) {
+            @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader,
+            @RequestHeader(value = "X-Refresh-Token", required = false) String refreshTokenHeader) {
         log.info("Become restaurant request");
 
         String accessToken = extractToken(authHeader);
@@ -117,7 +122,10 @@ public class AuthController {
                     .body(Map.of("message", "Missing or invalid authorization header")));
         }
 
-        return authService.becomeRestaurant(request, accessToken)
+        // Get refresh token from header or request body
+        String refreshToken = refreshTokenHeader != null ? refreshTokenHeader : request.getRefreshToken();
+
+        return authService.becomeRestaurant(request, accessToken, refreshToken)
                 .<Object>map(response -> response)
                 .map(response -> ResponseEntity.status(HttpStatus.CREATED).body(response))
                 .onErrorResume(e -> {

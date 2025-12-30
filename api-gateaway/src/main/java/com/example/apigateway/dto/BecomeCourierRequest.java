@@ -24,4 +24,6 @@ public class BecomeCourierRequest {
 
     @Email(message = "Invalid email format")
     private String email;
+
+    private String refreshToken;
 }
